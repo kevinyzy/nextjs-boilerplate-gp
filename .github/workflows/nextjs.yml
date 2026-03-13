@@ -2,8 +2,8 @@ name: Deploy Next.js site to Pages
 
 on:
   push:
-    branches: ["main"]    # 监听 main 分支推送
-  workflow_dispatch:       # 允许手动触发
+    branches: ["main"]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -27,25 +27,19 @@ jobs:
           node-version: "20"
           cache: 'npm'
           
-      - name: Restore cache
-        uses: actions/cache@v4
-        with:
-          path: |
-            .next/cache
-          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**.[jt]s', '**.[jt]sx') }}
-          restore-keys: |
-            ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
-            
       - name: Install dependencies
         run: npm ci
         
       - name: Build with Next.js
         run: npm run build
         
+      - name: List build output    # 调试：确认目录存在
+        run: ls -la
+        
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./out    # Next.js 14+ 默认输出目录，旧版可能是 'dist' 或 '.next'
+          path: ./dist    # 关键：与 next.config.js 中的 distDir 一致
 
   deploy:
     environment:
